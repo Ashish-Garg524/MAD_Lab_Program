@@ -1,0 +1,171 @@
+MainActivity.java
+
+package com.example.lab5;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import com.google.android.material.snackbar.Snackbar;
+
+public class MainActivity extends AppCompatActivity {
+
+    EditText uname, pswd;
+
+    Button login,cancel;
+
+    DbHandler db;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        uname= findViewById(R.id.editText);
+        pswd = findViewById(R.id.editText2);
+        login = findViewById(R.id.button);
+        cancel = findViewById(R.id.button2);
+
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = uname.getText().toString();
+                String password = pswd.getText().toString();
+                int id = checkUser(new User(name, password));
+
+                if(id==-1){
+                    Snackbar.make(v,"User" + name + "Does not exist", Snackbar.LENGTH_LONG).show();
+                }
+                else {
+                    Snackbar.make(v,"User" + name + " Exist", Snackbar.LENGTH_LONG).show();
+                    Intent i = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(i);
+                }
+            }
+        });
+                db = new DbHandler(MainActivity.this);
+                db.addUser(new User("Ashish","12345"));
+                db.addUser(new User("Free","software"));
+                db.addUser(new User("Hello","world"));
+    }
+
+    public int checkUser(User user) {
+        return db.checkUser(user);
+    }
+}
+
+---------------------------------------------------------------------
+LoginActivity.java
+
+package com.example.lab5;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+
+public class LoginActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+    }
+}
+
+----------------------------------------------------------------------
+
+DbHandler.java
+
+package com.example.lab5;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class DbHandler extends SQLiteOpenHelper {
+
+    private static final int Db_Version = 1;
+    private static final String Db_name="users",Table_Name="user",User_id = "id",User_name="name",User_password="password";
+    public DbHandler(MainActivity context) {
+        super(context,Db_name,null,Db_Version);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        String Create_Table= "CREATE TABLE " + Table_Name + "(" + User_id + "INTEGER PRIMARY KEY,"+ User_name + "TEXT," + User_password + "TEXT" + ")";
+        db.execSQL(Create_Table);
+    }
+
+    public void onUpgrade(SQLiteDatabase db,int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + Table_Name);
+        onCreate(db);
+    }
+
+    public void addUser(User user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(User_name,user.getName());
+        cv.put(User_password,user.getPassword());
+        db.insert(Table_Name,null,cv);
+        db.close();
+    }
+
+    public int checkUser(User user) {
+        int id = -1;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT id FROM user WHERE name =? AND password =?", new String[]{user.getName(),user.getPassword()});
+        if(cursor.getCount() >0) {
+            cursor.moveToFirst();
+            id=cursor.getInt(0);
+            cursor.close();
+        }
+        return id;
+    }
+}
+ 
+----------------------------------------------------------------------------
+User.java
+package com.example.lab5;
+
+public class User {
+    int id;
+    String name;
+    String password;
+
+
+    public User(String name, String password) {
+        this.name = name;
+        this.password = password;
+    }
+
+    public User(int id, String name, String password) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+    }
+
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id=id;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name=name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password=password;
+    }
+}
