@@ -1,6 +1,104 @@
-MainActivity.java
+activity_main.xml
 
-package com.example.lab5;
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lab-5"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.129" />
+
+    <EditText
+        android:id="@+id/username"
+        android:layout_width="288dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="61dp"
+        android:layout_marginTop="188dp"
+        android:layout_marginEnd="62dp"
+        android:layout_marginBottom="495dp"
+        android:ems="10"
+        android:hint="Ente the Username"
+        android:inputType="text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="287dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="62dp"
+        android:layout_marginTop="264dp"
+        android:layout_marginEnd="63dp"
+        android:layout_marginBottom="418dp"
+        android:ems="10"
+        android:hint="Ente thePassword"
+        android:inputType="textPassword"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="39dp"
+        android:layout_marginTop="370dp"
+        android:layout_marginEnd="284dp"
+        android:layout_marginBottom="313dp"
+        android:text="Login"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/Cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="258dp"
+        android:layout_marginTop="370dp"
+        android:layout_marginEnd="61dp"
+        android:layout_marginBottom="313dp"
+        android:text="Cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/register"
+        android:layout_width="217dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="97dp"
+        android:layout_marginTop="463dp"
+        android:layout_marginEnd="97dp"
+        android:layout_marginBottom="219dp"
+        android:text="Register A New User"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+---------------------------------------------------------------------
+ActivityMain.java
+
+package com.example.labprogram5;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,133 +107,189 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import com.google.android.material.snackbar.Snackbar;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText uname, pswd;
 
-    Button login,cancel;
+    EditText usernameText,passwordText;
+    Button login, cancel, register;
+    database DB;
 
-    DbHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        uname= findViewById(R.id.editText);
-        pswd = findViewById(R.id.editText2);
-        login = findViewById(R.id.button);
-        cancel = findViewById(R.id.button2);
+        usernameText = findViewById(R.id.username);
+        passwordText = findViewById(R.id.password);
+        login = findViewById(R.id.login);
+        cancel = findViewById(R.id.Cancel);
+        register = findViewById(R.id.register);
+
+        DB=new database(this);
+
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username=usernameText.getText().toString();
+                String password=passwordText.getText().toString();
+
+                boolean result=DB.addUser(username,password);
+                if(result==true) {
+                    Toast.makeText(getApplicationContext(), "Registration Process Completed", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"User Already Exists",Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = uname.getText().toString();
-                String password = pswd.getText().toString();
-                int id = checkUser(new User(name, password));
-
-                if(id==-1){
-                    Snackbar.make(v,"User" + name + "Does not exist", Snackbar.LENGTH_LONG).show();
-                }
-                else {
-                    Snackbar.make(v,"User" + name + " Exist", Snackbar.LENGTH_LONG).show();
-                    Intent i = new Intent(MainActivity.this, LoginActivity.class);
-                    startActivity(i);
+                String username=usernameText.getText().toString();
+                String password=passwordText.getText().toString();
+                Boolean cr=DB.checkUser(new User(username,password));
+                if(cr==false){
+                    Toast.makeText(getApplicationContext(),"User Not Exist, Please Register First", Toast.LENGTH_LONG).show();
+                }else{
+//                    Toast.makeText(getApplicationContext(),"Welcome "+username,Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class).putExtra("username", username));
                 }
             }
         });
-                db = new DbHandler(MainActivity.this);
-                db.addUser(new User("Ashish","12345"));
-                db.addUser(new User("Free","software"));
-                db.addUser(new User("Hello","world"));
-    }
 
-    public int checkUser(User user) {
-        return db.checkUser(user);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 }
 
 ---------------------------------------------------------------------
+activity_login.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="135dp"
+        android:layout_marginTop="220dp"
+        android:layout_marginEnd="135dp"
+        android:layout_marginBottom="466dp"
+        android:text="Welcome"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+---------------------------------------------------------------------
 LoginActivity.java
 
-package com.example.lab5;
+package com.example.labprogram5;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
+
+    TextView welcomeTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        welcomeTextView = findViewById(R.id.textView);
+
+        String username = getIntent().getStringExtra("username");
+        welcomeTextView.setText("Welcome, " + username + "!");
     }
 }
 
 ----------------------------------------------------------------------
 
-DbHandler.java
+database.java
 
-package com.example.lab5;
+package com.example.labprogram5;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.view.View;
 
-public class DbHandler extends SQLiteOpenHelper {
+public class database extends SQLiteOpenHelper {
 
-    private static final int Db_Version = 1;
-    private static final String Db_name="users",Table_Name="user",User_id = "id",User_name="name",User_password="password";
-    public DbHandler(MainActivity context) {
-        super(context,Db_name,null,Db_Version);
+//   user-db  -> Name od The Database.
+//    user  -> Name of the Table having 2 columns [username(Primary Key) , password].
+
+    public database( Context context) {
+        super(context, "user-db",null,1);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String Create_Table= "CREATE TABLE " + Table_Name + "(" + User_id + "INTEGER PRIMARY KEY,"+ User_name + "TEXT," + User_password + "TEXT" + ")";
-        db.execSQL(Create_Table);
+        db.execSQL("create table user(username TEXT primary key , password TEXT)");
     }
 
-    public void onUpgrade(SQLiteDatabase db,int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + Table_Name);
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("drop table if exists user");
         onCreate(db);
     }
 
-    public void addUser(User user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put(User_name,user.getName());
-        cv.put(User_password,user.getPassword());
-        db.insert(Table_Name,null,cv);
-        db.close();
+    public boolean addUser(String username, String password) {
+        SQLiteDatabase db=this.getWritableDatabase();
+        ContentValues contentValues=new ContentValues();
+        contentValues.put("username",username);
+        contentValues.put("password",password);
+        long result=db.insert("user",null,contentValues);
+        if(result==-1){
+            return false;
+        }else{
+            return true;
+        }
     }
 
-    public int checkUser(User user) {
-        int id = -1;
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT id FROM user WHERE name =? AND password =?", new String[]{user.getName(),user.getPassword()});
-        if(cursor.getCount() >0) {
-            cursor.moveToFirst();
-            id=cursor.getInt(0);
-            cursor.close();
+    public Boolean checkUser(User user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cr = db.rawQuery("select * from user where username='" + user.getName() + "' and  password=='"+user.getPassword()+"'", null);
+        if (cr.getCount() == 0) {
+            return false;
+        } else {
+            return true;
         }
-        return id;
     }
 }
+
  
 ----------------------------------------------------------------------------
 User.java
-package com.example.lab5;
+
+package com.example.labprogram5;
 
 public class User {
     int id;
-    String name;
-    String password;
-
+    String name, password;
 
     public User(String name, String password) {
         this.name = name;
@@ -151,21 +305,24 @@ public class User {
     public int getId() {
         return id;
     }
+
     public void setId(int id) {
-        this.id=id;
+        this.id = id;
     }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
-        this.name=name;
+        this.name = name;
     }
 
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
-        this.password=password;
+        this.password = password;
     }
 }
